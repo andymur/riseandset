@@ -56,6 +56,25 @@ def calculate_daylight_times_in_hours(month_rise_and_set):
 		result.append(calculate_daylight_time_in_hours(sunrise_time, sunset_time))
 	return result
 
+def calendar_lines(filename):
+    linecounter = 0
+    body_started = False
+    calendar = []
+    header_size = 6
+    calendar_lines = 4 + header_size + 31
+    
+    with open(filename) as f:
+        for line in f:
+            if (not body_started) and ('<pre>' in line):
+                body_started = True
+            if body_started:
+                linecounter += 1
+                if linecounter > header_size and linecounter < calendar_lines:
+                    calendar.append(line)
+    
+    # skip first three lines: month names line, rise-set line and h-m line
+    return calendar[3:]
+
 if __name__ == "__main__":
 
     #input_filename = "seattle.dat"  # sys.argv[1]
@@ -63,14 +82,8 @@ if __name__ == "__main__":
     day_lines = []
     calendar = {month: [None] * days_in_month(month) for month in months}
 
-    with open(input_filename) as input_file:
-        month_line = input_file.readline()
-        header_line = input_file.readline()
-        h_m_line = input_file.readline()
-
-        for line in input_file:
-            day_lines.append(line)
-
+    day_lines = calendar_lines(input_filename)
+    
     day_number = 0
     for day_line in day_lines:
         months_day_rise_and_set = each_month_day_rise_and_set(day_line)
